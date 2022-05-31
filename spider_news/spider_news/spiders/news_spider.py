@@ -4,6 +4,12 @@ import os
 import csv
 
 
+def isChinese(word):
+    for ch in word:
+        if '\u4e00' <= ch <= '\u9fff':
+            return True
+    return False
+
 class NewsSpider(scrapy.Spider):
     name = "news"
 
@@ -14,16 +20,24 @@ class NewsSpider(scrapy.Spider):
             with open(os.path.join(dirname,filename), 'r', encoding="utf_8_sig") as f:
                 data = json.load(f)
                 start_urls.extend(data['urls'])
-    print(start_urls)           
+    print(len(start_urls), start_urls)           
 
     def parse(self, response):
         path  = "../../news.csv"
         for news in response.css('div.main'):
             if news.css('h1::text').get() is not None:
+                text = ','.join(news.css('p::text').getall()).replace("\n", ",").replace("\t", ",").replace("\u3000", ",").replace("\xa0", ",")
+                for c in text:
+                    if not isChinese(c) and c != ',' and not c.isdigit() and c != '.' and c != '%':
+                        text = text.replace(c, ",")
+                title = news.css('h1::text').get()
+                for c in title:
+                    if not isChinese(c) and c != ',' and not c.isdigit() and c != '.' and c != '%':
+                        title = title.replace(c, ",")
                 data = {
                     'url': response.url,
-                    'title': news.css('h1::text').get(),
-                    'news_content': ' '.join(news.css('p::text').getall()).replace("\n", "").replace("\t", "").replace("\u3000", "").replace("\xa0", ""),
+                    'title': title,
+                    'news_content': text,
                 }
                 with open(path, 'a+', encoding="utf_8_sig") as f:
                     writer = csv.writer(f)
