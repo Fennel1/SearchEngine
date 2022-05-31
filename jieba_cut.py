@@ -16,6 +16,9 @@ for item in reader:
         title = jieba.lcut_for_search(item[1])
         while ',' in title:
             title.remove(',')
+        for c in title:         # 统计词数
+            words_set.add(c)
+            words_list.append(c)
         print(title)
         title = ','.join(title)
 

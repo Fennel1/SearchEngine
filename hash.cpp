@@ -17,15 +17,11 @@ unsigned int BKDRHash(const char *str){  // 哈希函数
 
 bool HasBom(const char* decKrc, uint32_t decKrcLen)
 {
-    if (decKrcLen >= 3 
-        && (unsigned char)decKrc[0] == 0xEF 
-        && (unsigned char)decKrc[1] == 0xBB 
-        && (unsigned char)decKrc[2] == 0xBF)
-    {
-        return true;
-    }
-
-    return false;
+    if (decKrcLen >= 3 && 
+    (unsigned char)decKrc[0] == 0xEF && 
+    (unsigned char)decKrc[1] == 0xBB && 
+    (unsigned char)decKrc[2] == 0xBF)   return true;
+    else    return false;
 }
 
 
