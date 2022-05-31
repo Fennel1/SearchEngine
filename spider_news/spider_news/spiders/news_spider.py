@@ -23,7 +23,7 @@ class NewsSpider(scrapy.Spider):
     print(len(start_urls), start_urls)           
 
     def parse(self, response):
-        path  = "../../news.csv"
+        path  = "../../data/news.csv"
         for news in response.css('div.main'):
             if news.css('h1::text').get() is not None:
                 text = ','.join(news.css('p::text').getall()).replace("\n", ",").replace("\t", ",").replace("\u3000", ",").replace("\xa0", ",")
@@ -39,7 +39,7 @@ class NewsSpider(scrapy.Spider):
                     'title': title,
                     'news_content': text,
                 }
-                with open(path, 'a+', encoding="utf_8_sig") as f:
+                with open(path, 'a+', encoding="utf_8_sig", newline='') as f:
                     writer = csv.writer(f)
                     writer.writerow([data['url'], data['title'], data['news_content'].split("人民日报违法和不良信息举报电话")[0]])
                 yield data

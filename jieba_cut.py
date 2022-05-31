@@ -2,11 +2,13 @@
 import jieba
 import csv
 
+load_path = "data/news.csv"
+save_path = "data/news_words.csv"
 
 words_set = set()
 words_list = list()
 
-csvFile = open("news.csv", "r", encoding="utf_8_sig")
+csvFile = open(load_path, "r", encoding="utf_8_sig")
 reader = csv.reader(csvFile)
 for item in reader:
     if len(item) > 0:
@@ -27,10 +29,11 @@ for item in reader:
         words = ','.join(words)
         print(words)
 
-        with open("news_words.csv", 'a+', encoding="utf_8_sig") as f:   # 写入分词结果
+        with open(save_path, 'a+', encoding="GBK", newline='') as f:   # 写入分词结果
             writer = csv.writer(f)
             writer.writerow([item[0],title,words])
             # pass
+        # break
 csvFile.close()
 
 print('num of words_list:',len(words_list))
