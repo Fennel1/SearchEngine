@@ -107,6 +107,7 @@ int main()
             temp_index.clear();
         }
     }
+    inFile.close();
 
     if (count>0){
         MergeSort(temp_index, 0, temp_index.size()-1);
@@ -117,6 +118,7 @@ int main()
         }
         temp_index.clear();
     }
+    outFile.close();
 
     t_end = clock();
     cout << "运行时间"<< (double)(t_end-t_start)/CLOCKS_PER_SEC << "s" <<endl;

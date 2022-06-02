@@ -123,6 +123,7 @@ int main()
         }
         url_num++;
     }
+    inFile.close();
 
     ofstream outFile;
     outFile.open(save_temp_index_path);
@@ -140,6 +141,7 @@ int main()
     for (unsigned int i=0; i<url_code.size(); i++){
         outFile << i << "," << url_code[i] << endl;
     }
+    outFile.close();
 
     t_end = clock();
     cout << "运行时间"<< (double)(t_end-t_start)/CLOCKS_PER_SEC << "s" <<endl;

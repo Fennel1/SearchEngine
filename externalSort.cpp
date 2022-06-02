@@ -7,8 +7,8 @@
 #include <io.h>
 using namespace std;
 
-
 bool DEBUG = false;
+
 
 struct WordInfo{
     int word_hash;
@@ -130,7 +130,7 @@ int main()
 
         }
         temp_index.push_back(WordInfo(now[LoserTree[0]].word_hash, now[LoserTree[0]].word_num, now[LoserTree[0]].url));
-        
+
         GetNext(files[LoserTree[0]], now, LoserTree[0]);
         Adjust(LoserTree, now, LoserTree[0], file_num);
     }
