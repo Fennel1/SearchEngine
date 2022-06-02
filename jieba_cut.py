@@ -5,6 +5,9 @@ import csv
 load_path = "data/news.csv"
 save_path = "data/news_words.csv"
 
+with open(save_path, 'r+', encoding="utf_8_sig", newline='') as f:  # 清空文件
+    f.truncate()
+
 words_set = set()
 words_list = list()
 

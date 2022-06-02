@@ -3,6 +3,7 @@
 # include <vector>
 # include <string>
 # include <sstream>
+# include <time.h>
 using namespace std;
 
 
@@ -24,7 +25,6 @@ bool HasBom(const char* decKrc, uint32_t decKrcLen)
     else    return false;
 }
 
-
 struct WordInfo{
     int word_hash;
     int word_num;
@@ -43,25 +43,30 @@ string save_url_code_path = "data/url_code.csv";
 vector<WordInfo> temp_index;          // 临时索引文件
 vector<pair<string, int>> word_code(0x7FFFFF, make_pair(" ", 0));    // 单词编号文件
 vector<string> url_code;                    // 网址编号文件
+clock_t t_start, t_end;
+bool DEBUG = false;
 
 int main()
 {
+    int conflict_num = 0;
+    t_start = clock();
+    cout << "————————————————————————————开始处理————————————————————————————" << endl;
     ifstream inFile(load_path);
     string line;
     int url_num = 0;
     while (getline(inFile,line)){
-        cout << "————————————————————————————开始处理第" << url_num+1 << "个网页————————————————————————————" << endl;
-        cout << line.size() << endl;
-        
         if (HasBom(line.c_str(), line.size()))  line = line.substr(3); //处理UTF-8 BOM文件
-        // cout << line << endl;
+        if (DEBUG){
+            cout << "————————————————————————————开始处理第" << url_num+1 << "个网页————————————————————————————" << endl;
+            cout << line.size() << endl;
+        }
 
         string url;
         istringstream ss(line);
         getline(ss, url, '\"');
         url = url.substr(0, url.size() - 1);
         url_code.push_back(url);
-        cout << "url:" << url << endl;
+        if (DEBUG)  cout << "url: " << url << endl;
 
         string title, words, word="";
         int word_hash = 0;
@@ -69,7 +74,8 @@ int main()
         getline(ss, words, '\"');
         getline(ss, words, '\"');
         words = title + ',' + words + ',';
-        cout << words << endl;
+        if (DEBUG) cout << "words: " << words << endl;
+
         for (unsigned int i=0; i<words.length(); i++){
             if (words[i] == ','){
                 word_hash = BKDRHash(word.c_str());     // 获取哈希值
@@ -77,17 +83,24 @@ int main()
                 if (word_code[word_hash].first ==  " "){    // 单词编号文件中没有该单词
                     word_code[word_hash].first = word;
                     word_code[word_hash].second = 1;
-                    // temp_index.push_back(WordInfo(word_hash, 0, url_num));
                 }
                 else if (word_code[word_hash].first == word){   // 单词已经存在，则记录次数
                     word_code[word_hash].second++;
                 }
                 else{   // 单词冲突
-                    while (word_code[(++word_hash)%0x7FFFFF].first == " "){
-                        word_code[word_hash].first = word;
-                        word_code[word_hash].second = 1;
-                        // temp_index.push_back(WordInfo(word_hash, 0, url_num));
-                        break;
+                    if (DEBUG) cout << "冲突：" << word << ":" << word_code[word_hash].first << word_hash << endl;
+                    while (true){
+                        if (word_code[word_hash].first == " "){
+                            word_code[word_hash].first = word;
+                            word_code[word_hash].second = 1;
+                            break;
+                        }
+                        else if (word_code[word_hash].first == word){
+                            word_code[word_hash].second++;
+                            break;
+                        }
+                        else conflict_num++;
+                        word_hash = (word_hash+1)%0x7FFFFF;
                     }
                 }
                 word = "";
@@ -104,9 +117,11 @@ int main()
             }
         }
 
-        cout << temp_index.size() << endl;
+        if (DEBUG) {
+            cout << "临时索引表长:" << temp_index.size() << endl;
+            cout << "————————————————————————————结束处理第" << url_num+1 << "个网页————————————————————————————" << endl;
+        }
         url_num++;
-        // if (url_num == 1)   break;
     }
 
     ofstream outFile;
@@ -126,6 +141,11 @@ int main()
         outFile << i << "," << url_code[i] << endl;
     }
 
+    t_end = clock();
+    cout << "运行时间"<< (double)(t_end-t_start)/CLOCKS_PER_SEC << "s" <<endl;
+    cout << "处理文章数:" << url_num << endl;
+    cout << "冲突数:" << conflict_num << endl;
+    cout << "————————————————————————————处理完成————————————————————————————" << endl;
 
     return 0;
 }

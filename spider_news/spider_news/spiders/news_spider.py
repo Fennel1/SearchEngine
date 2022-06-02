@@ -20,7 +20,10 @@ class NewsSpider(scrapy.Spider):
             with open(os.path.join(dirname,filename), 'r', encoding="utf_8_sig") as f:
                 data = json.load(f)
                 start_urls.extend(data['urls'])
-    print(len(start_urls), start_urls)           
+    print(len(start_urls), start_urls)          
+
+    with open("../../data/news.csv", 'r+', encoding="utf_8_sig", newline='') as f:  # 清空文件
+        f.truncate()
 
     def parse(self, response):
         path  = "../../data/news.csv"
