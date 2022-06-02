@@ -46,7 +46,10 @@ void Adjust(vector<int> &lt, vector<WordInfo> &now, int i, int k)
 {
     int tmp = (i+k)/2;
     while (tmp>0){
-        if ((now[i].word_hash > now[lt[tmp]].word_hash) || ((now[i].word_hash == now[lt[tmp]].word_hash) && (now[i].url > now[lt[tmp]].url))){
+        if ((now[i].word_hash > now[lt[tmp]].word_hash)
+             || ((now[i].word_hash == now[lt[tmp]].word_hash) 
+            //  && (now[i].url > now[lt[tmp]].url))){
+             && (now[i].word_num < now[lt[tmp]].word_num))){
             int t = lt[tmp];
             lt[tmp] = i;
             i = t;

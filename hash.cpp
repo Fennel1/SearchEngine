@@ -34,6 +34,11 @@ struct WordInfo{
         this->word_num = num;
         this->url = url;
     }
+    WordInfo(const WordInfo &other){
+        this->word_hash = other.word_hash;
+        this->word_num = other.word_num;
+        this->url = other.url;
+    }
 };
 
 string load_path = "data/news_words.csv";

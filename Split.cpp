@@ -28,7 +28,9 @@ void Merge(vector<WordInfo> &mylist, int low, int high, int mid)
     vector<WordInfo> templist(len, WordInfo(0, 0, 0));
 
     while (i<=mid && j<=high){ 
-        if (mylist[i].word_hash <= mylist[j].word_hash){
+        if (mylist[i].word_hash < mylist[j].word_hash 
+            || ((mylist[i].word_hash == mylist[j].word_hash) 
+            && mylist[i].word_num < mylist[j].word_num)){
             templist[k].word_hash = mylist[i].word_hash;
             templist[k].word_num = mylist[i].word_num;
             templist[k].url = mylist[i].url;
@@ -117,8 +119,10 @@ int main()
             outFile << temp_index[i].word_hash << "," << temp_index[i].word_num << "," << temp_index[i].url << endl;
         }
         temp_index.clear();
+        outFile.close();
     }
-    outFile.close();
+    
+
 
     t_end = clock();
     cout << "运行时间"<< (double)(t_end-t_start)/CLOCKS_PER_SEC << "s" <<endl;
