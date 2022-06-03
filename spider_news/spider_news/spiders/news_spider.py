@@ -35,7 +35,7 @@ class NewsSpider(scrapy.Spider):
                         text = text.replace(c, ",")
                 title = news.css('h1::text').get()
                 for c in title:
-                    if not isChinese(c) and c != ',' and not c.isdigit() and c != '.' and c != '%':
+                    if not isChinese(c) and c != ',' and not c.isdigit() and c != '.' and c != '%' and c!='\"' and not c.isalpha():
                         title = title.replace(c, ",")
                 data = {
                     'url': response.url,

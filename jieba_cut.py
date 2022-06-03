@@ -3,9 +3,12 @@ import jieba
 import csv
 
 load_path = "data/news.csv"
-save_path = "data/news_words.csv"
+save_news_words_path = "data/news_words.csv"
+save_url_code_path = "data/url_code.csv"
 
-with open(save_path, 'r+', encoding="utf_8_sig", newline='') as f:  # 清空文件
+with open(save_news_words_path, 'r+', encoding="utf_8_sig", newline='') as f:  # 清空文件
+    f.truncate()
+with open(save_url_code_path, 'r+', encoding="utf_8_sig", newline='') as f:  # 清空文件
     f.truncate()
 
 words_set = set()
@@ -13,9 +16,13 @@ words_list = list()
 
 csvFile = open(load_path, "r", encoding="utf_8_sig")
 reader = csv.reader(csvFile)
-for item in reader:
+for i, item in enumerate(reader):
     if len(item) > 0:
         print(item[1])          # 新闻标题分词
+        with open(save_url_code_path, 'a+', encoding="GBK", newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([i, item[0], item[1]])
+
         title = jieba.lcut_for_search(item[1])
         while ',' in title:
             title.remove(',')
@@ -35,11 +42,12 @@ for item in reader:
         words = ','.join(words)
         print(words)
 
-        with open(save_path, 'a+', encoding="GBK", newline='') as f:   # 写入分词结果
+        with open(save_news_words_path, 'a+', encoding="GBK", newline='') as f:   # 写入分词结果
             writer = csv.writer(f)
             writer.writerow([item[0],title,words])
             # pass
-        # break
+        # if i == 241:
+        #     break
 csvFile.close()
 
 print('num of words_list:',len(words_list))

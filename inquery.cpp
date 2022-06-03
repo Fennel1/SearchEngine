@@ -36,10 +36,11 @@ string load_invert_index_path = "data/invert_index.csv";
 string load_word_code_path = "data/word_code.csv";
 string load_url_code_path = "data/url_code.csv";
 vector<string> word_code(0x7FFFFF, " ");
-vector<string> url_code;
+vector<pair<string, string>> url_code;
 vector<NewsInfo> news;
 int type = 0;   //0-并集，1-交集
-bool DEBUG = false;
+clock_t t_start, t_end;
+bool DEBUG = true;
 
 
 int main()
@@ -61,23 +62,24 @@ int main()
     while (getline(inFile,line)){
         for (unsigned int i=0; i<line.size(); i++){
             if (line[i] == ',') line[i] = ' ';
+            else if (line[i] == '\"') line[i] = ' ';
         }
-        stringstream ss(line);
+        line += "\"";
+        istringstream ss(line);
         int code;
-        string url;
+        string url, title;
         ss >> code >> url;
-        url_code.push_back(url);
+        getline(ss, title, '\"');
+        url_code.push_back(make_pair(url, title));
     }
     inFile.close();
 
     string word="";
     vector<string> words;
-    string state="";
+    string state="y";
     do{
         cout << "输入要查询的单词(以空格分隔)：";
         getline(cin, line);
-        cout << "输入要查询的类型(0-并集，1-交集)：";
-        cin >> type;
         for (unsigned int i=0; i<line.size(); i++){
             if (line[i] == ' ') {
                 words.push_back(word);
@@ -86,6 +88,15 @@ int main()
             else word += line[i];
         }
         if (word != "") words.push_back(word);
+
+        if (words.size() == 0) continue;
+        else if (words.size()>1){
+            cout << "输入要查询的类型(0-并集，1-交集)：";
+            cin >> type;
+        }
+
+        t_start = clock();
+        cout << "————————————————————————————开始查找————————————————————————————" << endl;
 
         vector<int> num_list, url_list;
         for (unsigned int i=0; i<words.size(); i++){
@@ -134,7 +145,7 @@ int main()
                     if (type == 0){     //并集
                         if (news.empty()) {
                             for (unsigned int j=0; j<url_list.size(); j++){
-                                news.push_back(NewsInfo(url_list[j], words[i]+":"+to_string(num_list[j])));
+                                news.push_back(NewsInfo(url_list[j], words[i]+":"+to_string(num_list[j])+"次"));
                             }
                         }
                         else {
@@ -142,7 +153,7 @@ int main()
                             for (unsigned int j=0; j<url_list.size(); j++){
                                 for (unsigned int k=0; k<len; k++){
                                     if (news[k].url == url_list[j]){
-                                        news[k].word_info += ", "+words[i]+":"+to_string(num_list[j]);
+                                        news[k].word_info += ", "+words[i]+":"+to_string(num_list[j])+"次";
                                         break;
                                     }
                                     if (k == news.size()-1) news.push_back(NewsInfo(url_list[j], words[i]+":"+to_string(num_list[j])+"次"));
@@ -178,9 +189,12 @@ int main()
             url_list.clear();
         }
 
+        t_end = clock();
         cout << "————————————————————————————查询结果————————————————————————————" << endl;
+        cout << "运行时间"<< (double)(t_end-t_start)/CLOCKS_PER_SEC << "s" <<endl;
         for (unsigned int i=0; i<news.size(); i++){
-            cout << i+1 << "： " << url_code[news[i].url] << endl;
+            cout << i+1 << "： " << url_code[news[i].url].first << endl;
+            cout << "标题：" << url_code[news[i].url].second << endl;
             cout << news[i].word_info << endl;
             cout << endl;
         }
