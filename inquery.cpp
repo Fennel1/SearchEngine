@@ -156,7 +156,7 @@ int main()
                                         news[k].word_info += ", "+words[i]+":"+to_string(num_list[j])+"次";
                                         break;
                                     }
-                                    if (k == news.size()-1) news.push_back(NewsInfo(url_list[j], words[i]+":"+to_string(num_list[j])+"次"));
+                                    if (k == len-1) news.push_back(NewsInfo(url_list[j], words[i]+":"+to_string(num_list[j])+"次"));
                                 }
                             }
                         }

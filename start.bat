@@ -1,5 +1,5 @@
 cd spider_news/spider_news
-scrapy crawl news
+scrapy crawl news --nolog
 
 cd ../../
 python jieba_cut.py
