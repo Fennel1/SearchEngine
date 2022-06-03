@@ -1,10 +1,14 @@
 # encoding=utf-8
 import jieba
 import csv
+import time
 
 load_path = "data/news.csv"
 save_news_words_path = "data/news_words.csv"
 save_url_code_path = "data/url_code.csv"
+
+t_start = time.time()
+print("————————————————————————————开始分词————————————————————————————")
 
 with open(save_news_words_path, 'r+', encoding="utf_8_sig", newline='') as f:  # 清空文件
     f.truncate()
@@ -18,7 +22,7 @@ csvFile = open(load_path, "r", encoding="utf_8_sig")
 reader = csv.reader(csvFile)
 for i, item in enumerate(reader):
     if len(item) > 0:
-        print(item[1])          # 新闻标题分词
+        # print(item[1])          # 新闻标题分词
         with open(save_url_code_path, 'a+', encoding="GBK", newline='') as f:
             writer = csv.writer(f)
             writer.writerow([i, item[0], item[1]])
@@ -29,10 +33,10 @@ for i, item in enumerate(reader):
         for c in title:         # 统计词数
             words_set.add(c)
             words_list.append(c)
-        print(title)
+        # print(title)
         title = ','.join(title)
 
-        print(item[2])          # 新闻内容分词
+        # print(item[2])          # 新闻内容分词
         words = jieba.lcut_for_search(item[2])
         while ',' in words:
             words.remove(',')
@@ -40,7 +44,7 @@ for i, item in enumerate(reader):
             words_set.add(c)
             words_list.append(c)
         words = ','.join(words)
-        print(words)
+        # print(words)
 
         with open(save_news_words_path, 'a+', encoding="GBK", newline='') as f:   # 写入分词结果
             writer = csv.writer(f)
@@ -50,5 +54,8 @@ for i, item in enumerate(reader):
         #     break
 csvFile.close()
 
-print('num of words_list:',len(words_list))
-print('num of words_set:',len(words_set))
+t_end = time.time()
+print("————————————————————————————分词结束————————————————————————————")
+print("分词用时：", t_end - t_start, "s")
+print('单词数(有重复):',len(words_list))
+print('单词数(无重复):',len(words_set))

@@ -4,7 +4,7 @@
 # include <string>
 # include <sstream>
 # include <time.h>
-#include <io.h>
+# include <io.h>
 using namespace std;
 
 bool DEBUG = false;

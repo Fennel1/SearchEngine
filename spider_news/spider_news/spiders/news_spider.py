@@ -20,7 +20,7 @@ class NewsSpider(scrapy.Spider):
             with open(os.path.join(dirname,filename), 'r', encoding="utf_8_sig") as f:
                 data = json.load(f)
                 start_urls.extend(data['urls'])
-    print(len(start_urls), start_urls)          
+    print("num of urls:", len(start_urls))          
 
     with open("../../data/news.csv", 'r+', encoding="utf_8_sig", newline='') as f:  # 清空文件
         f.truncate()
@@ -45,6 +45,6 @@ class NewsSpider(scrapy.Spider):
                 with open(path, 'a+', encoding="utf_8_sig", newline='') as f:
                     writer = csv.writer(f)
                     writer.writerow([data['url'], data['title'], data['news_content'].split("人民日报违法和不良信息举报电话")[0]])
-                yield data
+                # yield data
         # anchors_a = response.css('div.relevant_news a')
         # yield from response.follow_all(anchors_a, callback=self.parse)

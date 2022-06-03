@@ -4,7 +4,7 @@
 # include <string>
 # include <sstream>
 # include <time.h>
-#include <io.h>
+# include <io.h>
 using namespace std;
 
 
@@ -40,7 +40,7 @@ vector<pair<string, string>> url_code;
 vector<NewsInfo> news;
 int type = 0;   //0-并集，1-交集
 clock_t t_start, t_end;
-bool DEBUG = true;
+bool DEBUG = false;
 
 
 int main()
