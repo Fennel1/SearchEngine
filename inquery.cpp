@@ -39,7 +39,7 @@ vector<string> word_code(0x7FFFFF, " ");
 vector<string> url_code;
 vector<NewsInfo> news;
 int type = 0;   //0-并集，1-交集
-bool DEBUG = true;
+bool DEBUG = false;
 
 
 int main()
@@ -72,112 +72,130 @@ int main()
 
     string word="";
     vector<string> words;
-    cout << "输入要查询的单词(以空格分隔)：";
-    getline(cin, line);
-    cout << "输入要查询的类型(0-并集，1-交集)：";
-    cin >> type;
-    for (unsigned int i=0; i<line.size(); i++){
-        if (line[i] == ' ') {
-            words.push_back(word);
+    string state="";
+    do{
+        cout << "输入要查询的单词(以空格分隔)：";
+        getline(cin, line);
+        cout << "输入要查询的类型(0-并集，1-交集)：";
+        cin >> type;
+        for (unsigned int i=0; i<line.size(); i++){
+            if (line[i] == ' ') {
+                words.push_back(word);
+                word = "";
+            }
+            else word += line[i];
+        }
+        if (word != "") words.push_back(word);
+
+        vector<int> num_list, url_list;
+        for (unsigned int i=0; i<words.size(); i++){
+            cout << "正在查找：" << words[i] << endl;
+            inFile.open(load_invert_index_path);
+            while (getline(inFile,line)){
+                for (unsigned int j=0; j<line.size(); j++){
+                    if (line[j] == '\"' && line[j-1] == ',') line[j-1] = ' ';
+                }
+                stringstream ss(line);
+                unsigned int word_hash;
+                string word_nums, urls;
+                ss >> word_hash >> word_nums >> urls;
+                // cout << word_hash << " " << word_code[word_hash] << " " << words[i] << endl;
+
+                if (word_code[word_hash] == words[i]){
+                    word_nums = word_nums.substr(1, word_nums.size()-2);
+                    urls = urls.substr(1, urls.size()-2);
+                    if (DEBUG)  cout << word_hash << " " << word_code[word_hash] << " " << word_nums << " " << urls << endl;
+
+                    int number=0;
+                    for (unsigned int j=0; j<word_nums.size(); j++){
+                        if (word_nums[j] == ',') {
+                            num_list.push_back(number);
+                            number = 0;
+                        }
+                        else{
+                            number = number*10 + word_nums[j] - '0';
+                        }
+                    }
+                    num_list.push_back(number);
+                    number = 0;
+                    for (unsigned int j=0; j<urls.size(); j++){
+                        if (urls[j] == ',') {
+                            url_list.push_back(number);
+                            number = 0;
+                        }
+                        else{
+                            number = number*10 + urls[j] - '0';
+                        }
+                    }
+                    url_list.push_back(number);
+
+                    cout << "查找成功，包含网页数：" << url_list.size() << endl;
+
+                    if (type == 0){     //并集
+                        if (news.empty()) {
+                            for (unsigned int j=0; j<url_list.size(); j++){
+                                news.push_back(NewsInfo(url_list[j], words[i]+":"+to_string(num_list[j])));
+                            }
+                        }
+                        else {
+                            unsigned int len = news.size();
+                            for (unsigned int j=0; j<url_list.size(); j++){
+                                for (unsigned int k=0; k<len; k++){
+                                    if (news[k].url == url_list[j]){
+                                        news[k].word_info += ", "+words[i]+":"+to_string(num_list[j]);
+                                        break;
+                                    }
+                                    if (k == news.size()-1) news.push_back(NewsInfo(url_list[j], words[i]+":"+to_string(num_list[j])+"次"));
+                                }
+                            }
+                        }
+                    }
+                    else{   //交集
+                        if (news.empty()) {
+                            for (unsigned int j=0; j<url_list.size(); j++){
+                                news.push_back(NewsInfo(url_list[j], words[i]+":"+to_string(num_list[j])+"次"));
+                            }
+                        }
+                        else {
+                            vector<NewsInfo> temp_news_code;
+                            for (unsigned int j=0; j<news.size(); j++){
+                                for (unsigned int k=0; k<url_list.size(); k++){
+                                    if (news[j].url == url_list[k]){
+                                        temp_news_code.push_back(NewsInfo(url_list[k], news[j].word_info+", "+words[i]+":"+to_string(num_list[k])+"次"));
+                                        break;
+                                    }
+                                }
+                            }
+                            news = temp_news_code;
+                        }
+                    }
+                    break;
+                }
+            }
+            if (url_list.empty()) cout << "查找失败" << endl;
+            inFile.close();
+            num_list.clear();
+            url_list.clear();
+        }
+
+        cout << "————————————————————————————查询结果————————————————————————————" << endl;
+        for (unsigned int i=0; i<news.size(); i++){
+            cout << i+1 << "： " << url_code[news[i].url] << endl;
+            cout << news[i].word_info << endl;
+            cout << endl;
+        }
+        if (news.empty()) cout << "查询结果为空" << endl << endl;;
+
+        cout << "是否继续查询？(y/n)：";
+        cin >> state;
+        if (state == "y"){
+            news.clear();
+            words.clear();
             word = "";
+            system("cls");
+            getchar();
         }
-        else word += line[i];
-    }
-    if (word != "") words.push_back(word);
-
-    vector<int> num_list, url_list;
-    for (unsigned int i=0; i<words.size(); i++){
-        cout << "正在查找：" << words[i] << endl;
-        inFile.open(load_invert_index_path);
-        while (getline(inFile,line)){
-            for (unsigned int j=0; j<line.size(); j++){
-                if (line[j] == '\"' && line[j-1] == ',') line[j-1] = ' ';
-            }
-            stringstream ss(line);
-            unsigned int word_hash;
-            string word_nums, urls;
-            ss >> word_hash >> word_nums >> urls;
-            // cout << word_hash << " " << word_code[word_hash] << " " << words[i] << endl;
-
-            if (word_code[word_hash] == words[i]){
-                word_nums = word_nums.substr(1, word_nums.size()-2);
-                urls = urls.substr(1, urls.size()-2);
-                if (DEBUG)  cout << word_hash << " " << word_code[word_hash] << " " << word_nums << " " << urls << endl;
-
-                int number=0;
-                for (unsigned int j=0; j<word_nums.size(); j++){
-                    if (word_nums[j] == ',') {
-                        num_list.push_back(number);
-                        number = 0;
-                    }
-                    else{
-                        number = number*10 + word_nums[j] - '0';
-                    }
-                }
-                num_list.push_back(number);
-                number = 0;
-                for (unsigned int j=0; j<urls.size(); j++){
-                    if (urls[j] == ',') {
-                        url_list.push_back(number);
-                        number = 0;
-                    }
-                    else{
-                        number = number*10 + urls[j] - '0';
-                    }
-                }
-                url_list.push_back(number);
-
-                if (type == 0){     //并集
-                    if (news.empty()) {
-                        for (unsigned int j=0; j<url_list.size(); j++){
-                            news.push_back(NewsInfo(url_list[j], words[i]+":"+to_string(num_list[j])));
-                        }
-                    }
-                    else {
-                        for (unsigned int j=0; j<url_list.size(); j++){
-                            for (unsigned int k=0; k<news.size(); k++){
-                                if (news[k].url == url_list[j]){
-                                    news[k].word_info += ", "+words[i]+":"+to_string(num_list[j]);
-                                    break;
-                                }
-                                if (k == news.size()-1) news.push_back(NewsInfo(url_list[j], words[i]+":"+to_string(num_list[j])+"次"));
-                            }
-                        }
-                    }
-                }
-                else{   //交集
-                    if (news.empty()) {
-                        for (unsigned int j=0; j<url_list.size(); j++){
-                            news.push_back(NewsInfo(url_list[j], words[i]+":"+to_string(num_list[j])+"次"));
-                        }
-                    }
-                    else {
-                        vector<NewsInfo> temp_news_code;
-                        for (unsigned int j=0; j<news.size(); j++){
-                            for (unsigned int k=0; k<url_list.size(); k++){
-                                if (news[j].url == url_list[k]){
-                                    temp_news_code.push_back(NewsInfo(url_list[k], news[j].word_info+", "+words[i]+":"+to_string(num_list[k])+"次"));
-                                    break;
-                                }
-                            }
-                        }
-                        news = temp_news_code;
-                    }
-                }
-                break;
-            }
-        }
-        inFile.close();
-        num_list.clear();
-        url_list.clear();
-    }
-
-    cout << "————————————————————————————查询结果————————————————————————————" << endl;
-    for (unsigned int i=0; i<news.size(); i++){
-        cout << url_code[news[i].url] << endl;
-        cout << news[i].word_info << endl;
-        cout << endl;
-    }
+    }while(state=="y");
 
     return 0;
 }

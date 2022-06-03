@@ -30,7 +30,7 @@ void Merge(vector<WordInfo> &mylist, int low, int high, int mid)
     while (i<=mid && j<=high){ 
         if (mylist[i].word_hash < mylist[j].word_hash 
             || ((mylist[i].word_hash == mylist[j].word_hash) 
-            && mylist[i].word_num < mylist[j].word_num)){
+            && mylist[i].word_num > mylist[j].word_num)){
             templist[k].word_hash = mylist[i].word_hash;
             templist[k].word_num = mylist[i].word_num;
             templist[k].url = mylist[i].url;
