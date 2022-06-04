@@ -8,16 +8,6 @@
 using namespace std;
 
 
-unsigned int BKDRHash(const char *str){  // 哈希函数
-    unsigned int seed = 131;
-    unsigned int hash = 0;
-    while (*str)    hash = hash * seed + (*str++);
-
-    // return (hash & 0x7FFFFFFF);
-    return (hash & 0x7FFFFF);
-}
-
-
 struct NewsInfo{
     int url;
     vector<int> word_num;
@@ -33,6 +23,36 @@ struct NewsInfo{
         this->words = other.words;
     }
 };
+
+
+struct URLInfo{
+    string url;
+    string title;
+    int day;
+    int score;
+    URLInfo(string url, string title, int day, int score){
+        this->url = url;
+        this->title = title;
+        this->day = day;
+        this->score = score;
+    }
+    URLInfo(const URLInfo &other){
+        this->url = other.url;
+        this->title = other.title;
+        this->day = other.day;
+        this->score = other.score;
+    }
+};
+
+
+unsigned int BKDRHash(const char *str){  // 哈希函数
+    unsigned int seed = 131;
+    unsigned int hash = 0;
+    while (*str)    hash = hash * seed + (*str++);
+
+    // return (hash & 0x7FFFFFFF);
+    return (hash & 0x7FFFFF);
+}
 
 
 void QuickSort(vector<NewsInfo> &mylist, int low, int high)
@@ -52,6 +72,46 @@ void QuickSort(vector<NewsInfo> &mylist, int low, int high)
     mylist[low] = tmp;
     QuickSort(mylist, i, low-1);
     QuickSort(mylist, low+1, j);
+}
+
+
+void QuickSortTime(vector<NewsInfo> &mylist, vector<URLInfo> &url_code, int low, int high)
+{
+    int i=low, j=high;
+    if (low > high)     return;
+
+    NewsInfo tmp = mylist[low];
+    while (low < high){
+        while (url_code[mylist[high].url].day <= url_code[tmp.url].day && low < high) high--;
+        mylist[low] = mylist[high];
+
+        while(url_code[mylist[low].url].day >= url_code[tmp.url].day && low < high) low++;
+        mylist[high] = mylist[low];
+    }
+
+    mylist[low] = tmp;
+    QuickSortTime(mylist, url_code, i, low-1);
+    QuickSortTime(mylist, url_code, low+1, j);
+}
+
+
+void QuickSortScore(vector<NewsInfo> &mylist, vector<URLInfo> &url_code, int low, int high)
+{
+    int i=low, j=high;
+    if (low > high)     return;
+
+    NewsInfo tmp = mylist[low];
+    while (low < high){
+        while (url_code[mylist[high].url].score <= url_code[tmp.url].score && low < high) high--;
+        mylist[low] = mylist[high];
+
+        while(url_code[mylist[low].url].score >= url_code[tmp.url].score && low < high) low++;
+        mylist[high] = mylist[low];
+    }
+
+    mylist[low] = tmp;
+    QuickSortScore(mylist, url_code, i, low-1);
+    QuickSortScore(mylist, url_code, low+1, j);
 }
 
 
@@ -110,9 +170,10 @@ string load_invert_index_path = "data/invert_index.csv";
 string load_word_code_path = "data/word_code.csv";
 string load_url_code_path = "data/url_code.csv";
 vector<string> word_code(0x7FFFFF, " ");
-vector<pair<string, string>> url_code;
+vector<URLInfo> url_code;
 vector<NewsInfo> news;
 int type = 0;   //0-并集，1-交集
+int model = 0;  //0-按照日期, 1-按照权重
 clock_t t_start, t_end;
 bool DEBUG = false;
 
@@ -140,11 +201,12 @@ int main()
         }
         line += "\"";
         istringstream ss(line);
-        int code;
+        int code, score, day;
         string url, title;
-        ss >> code >> url;
+        ss >> code >> day >> score >> url;
         getline(ss, title, '\"');
-        url_code.push_back(make_pair(url, title));
+        // cout << code << " " << day << " " << score << " " << url << " " << title << endl;
+        url_code.push_back(URLInfo(url, title, day, score));
     }
     inFile.close();
 
@@ -168,6 +230,9 @@ int main()
             cout << "输入要查询的类型(0-并集，1-交集)：";
             cin >> type;
         }
+
+        cout << "输入要查询的模式(0-按照时间，1-按照权重)：";
+        cin >> model;
 
         t_start = clock();
         cout << "————————————————————————————开始查找————————————————————————————" << endl;
@@ -287,12 +352,16 @@ int main()
                 int num=news[0].word_num.size(), l=0;
                 for (unsigned int i=0; i<=news.size(); i++){
                     if (i == news.size()){
+                        if (model == 0) QuickSortTime(news, url_code, l, i-1);
+                        else    QuickSortScore(news, url_code, l, i-1);
                         for (int j=num-1; j>=0; j--){
                             MergeSort(news, l, i-1, j);
                         }
                         break;
                     }
                     if (int(news[i].word_num.size()) != num){
+                        if (model == 0) QuickSortTime(news, url_code, l, i-1);
+                        else    QuickSortScore(news, url_code, l, i-1);
                         for (int j=num-1; j>=0; j--){
                             MergeSort(news, l, i-1, j);
                         }
@@ -302,6 +371,8 @@ int main()
                 }
             }
             else{
+                if (model == 0) QuickSortTime(news, url_code, 0, news.size()-1);
+                else    QuickSortScore(news, url_code, 0, news.size()-1);
                 for (int i=news[0].word_num.size()-1; i>=0; i--){
                     MergeSort(news, 0, news.size()-1, i);
                 }
@@ -314,13 +385,33 @@ int main()
         if (news.empty()) cout << "查询结果为空" << endl << endl;
         else{
             for (unsigned int i=0; i<news.size(); i++){
-                cout << i+1 << "： " << url_code[news[i].url].first << endl;
-                cout << "标题：" << url_code[news[i].url].second << endl;
+                cout << i+1 << "： " << url_code[news[i].url].url << endl;
+                cout << "标题：" << url_code[news[i].url].title << endl;
                 cout << "关键词：";
                 for (unsigned int j=0; j<news[i].words.size(); j++){
                     cout << news[i].words[j] << ":" << news[i].word_num[j] << "次  ";
                 }
-                cout << endl << endl;
+                cout << endl;
+                if (model == 0) cout << "日期：" << url_code[news[i].url].day/100 << "月" << url_code[news[i].url].day%100 << "日" << endl;
+                else    cout << "得分：" << url_code[news[i].url].score << endl;
+                cout << endl;
+            }
+        }
+
+        if (!news.empty()){
+            for (unsigned int i=0; i<news.size(); i++){
+                for (unsigned int j=0; j<news[i].word_num.size(); j++){
+                    url_code[news[i].url].score += news[i].word_num[j];
+                }
+            }
+
+            ofstream file;
+            file.open(load_url_code_path, fstream::binary);
+            file.close();
+            file.open(load_url_code_path, ios::app);
+            for (unsigned int i=0; i<url_code.size(); i++){
+                file << i << "," << url_code[i].day << "," << url_code[i].score << "," << url_code[i].url << "," << "\""+url_code[i].title.substr(1, url_code[i].title.size()-1)+"\"" << endl;
+                // cout << i << "," << url_code[i].day << "," << url_code[i].score << "," << url_code[i].url << "," << "\""+url_code[i].title.substr(1, url_code[i].title.size()-1)+"\"" << endl;
             }
         }
 
@@ -333,7 +424,7 @@ int main()
             system("cls");
             getchar();
         }
-        
+
     }while(state=="y");
 
     return 0;

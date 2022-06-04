@@ -44,7 +44,7 @@ struct WordInfo{
 string load_path = "data/news_words.csv";
 string save_temp_index_path = "data/temp_index.csv";
 string save_word_code_path = "data/word_code.csv";
-string save_url_code_path = "data/url_code.csv";
+// string save_url_code_path = "data/url_code.csv";
 vector<WordInfo> temp_index;          // 临时索引文件
 vector<pair<string, int>> word_code(0x7FFFFF, make_pair(" ", 0));    // 单词编号文件
 // vector<string> url_code;                    // 网址编号文件
