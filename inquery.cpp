@@ -29,8 +29,8 @@ struct URLInfo{
     string url;
     string title;
     int day;
-    int score;
-    URLInfo(string url, string title, int day, int score){
+    double score;
+    URLInfo(string url, string title, int day, double score){
         this->url = url;
         this->title = title;
         this->day = day;
@@ -154,6 +154,7 @@ void Merge(vector<NewsInfo> &mylist, int low, int high, int mid, int p)
     for (int i=0; i<len; i++)  mylist[low+i] = templist[i];
 }
 
+
 void MergeSort(vector<NewsInfo> &mylist, int low, int high, int p)
 {
     if (low < high)
@@ -201,7 +202,8 @@ int main()
         }
         line += "\"";
         istringstream ss(line);
-        int code, score, day;
+        int code, day;
+        double score;
         string url, title;
         ss >> code >> day >> score >> url;
         getline(ss, title, '\"');
@@ -398,13 +400,12 @@ int main()
             }
         }
 
-        if (!news.empty()){
+        if (!news.empty()){ // 更新权重
             for (unsigned int i=0; i<news.size(); i++){
                 for (unsigned int j=0; j<news[i].word_num.size(); j++){
-                    url_code[news[i].url].score += news[i].word_num[j];
+                    url_code[news[i].url].score += double(news[i].word_num[j])/news.size();
                 }
             }
-
             ofstream file;
             file.open(load_url_code_path, fstream::binary);
             file.close();

@@ -29,7 +29,7 @@ for i, item in enumerate(reader):
                 day = item[0][j+1:j+5]
         with open(save_url_code_path, 'a+', encoding="GBK", newline='') as f:
             writer = csv.writer(f)
-            writer.writerow([i, day, 0, item[0], item[1]])
+            writer.writerow([i, day, 0.0, item[0], item[1]])
 
         title = jieba.lcut_for_search(item[1])
         while ',' in title:

@@ -126,7 +126,7 @@ int main()
 
     t_end = clock();
     cout << "运行时间"<< (double)(t_end-t_start)/CLOCKS_PER_SEC << "s" <<endl;
-    cout << "分割文件数:" << file_index << endl;
+    cout << "分割文件数:" << file_index+1 << endl;
     cout << "————————————————————————————处理完成————————————————————————————" << endl;
 
     return 0;
