@@ -7,13 +7,16 @@
 using namespace std;
 
 
+const int MOD = 0x7FFFFF;
+
 unsigned int BKDRHash(const char *str){  // 哈希函数
     unsigned int seed = 131;
     unsigned int hash = 0;
     while (*str)    hash = hash * seed + (*str++);
 
     // return (hash & 0x7FFFFFFF);
-    return (hash & 0x7FFFFF);
+    // return (hash & 0x7FFFFF);
+    return (hash & MOD);
 }
 
 bool HasBom(const char* decKrc, uint32_t decKrcLen)
@@ -46,14 +49,14 @@ string save_temp_index_path = "data/temp_index.csv";
 string save_word_code_path = "data/word_code.csv";
 // string save_url_code_path = "data/url_code.csv";
 vector<WordInfo> temp_index;          // 临时索引文件
-vector<pair<string, int>> word_code(0x7FFFFF, make_pair(" ", 0));    // 单词编号文件
+vector<pair<string, int>> word_code(MOD, make_pair(" ", 0));    // 单词编号文件
 // vector<string> url_code;                    // 网址编号文件
 clock_t t_start, t_end;
 bool DEBUG = false;
 
 int main()
 {
-    int conflict_num = 0;
+    int conflict_num = 0, conflict_word_num = 0;
     t_start = clock();
     cout << "————————————————————————————开始处理————————————————————————————" << endl;
     ifstream inFile(load_path);
@@ -65,6 +68,7 @@ int main()
             cout << "————————————————————————————开始处理第" << url_num+1 << "个网页————————————————————————————" << endl;
             cout << line.size() << endl;
         }
+        // cout << url_num << endl;
 
         string url;
         istringstream ss(line);
@@ -98,6 +102,7 @@ int main()
                         if (word_code[word_hash].first == " "){
                             word_code[word_hash].first = word;
                             word_code[word_hash].second = 1;
+                            conflict_word_num++;
                             break;
                         }
                         else if (word_code[word_hash].first == word){
@@ -105,7 +110,7 @@ int main()
                             break;
                         }
                         else conflict_num++;
-                        word_hash = (word_hash+1)%0x7FFFFF;
+                        word_hash = (word_hash+1)%MOD;
                     }
                 }
                 word = "";
@@ -115,7 +120,7 @@ int main()
             }
         }
 
-        for (unsigned int i=0; i<0x7FFFFF; i++){
+        for (unsigned int i=0; i<MOD; i++){
             if (word_code[i].first != " " && word_code[i].second != 0){
                 temp_index.push_back(WordInfo(i, word_code[i].second, url_num));
                 word_code[i].second = 0;
@@ -152,6 +157,7 @@ int main()
     cout << "运行时间"<< (double)(t_end-t_start)/CLOCKS_PER_SEC << "s" <<endl;
     cout << "处理文章数:" << url_num << endl;
     cout << "冲突数:" << conflict_num << endl;
+    cout << "冲突单词数:" << conflict_word_num << endl;
     cout << "————————————————————————————处理完成————————————————————————————" << endl;
 
     return 0;

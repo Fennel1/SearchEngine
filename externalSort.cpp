@@ -8,7 +8,7 @@
 using namespace std;
 
 bool DEBUG = false;
-
+const int MOD = 0x7FFFFF;
 
 struct WordInfo{
     int word_hash;
@@ -71,7 +71,7 @@ void CreateLoserTree(vector<int> &lt, vector<WordInfo> &now, int k)
 void GetNext(ifstream &file, vector<WordInfo> &now, int i)
 {
     string line;
-    if (now[i].word_hash == 0x7FFFFF) return;
+    if (now[i].word_hash == MOD) return;
     if (getline(file, line)){
         for (unsigned int i=0; i<line.size(); i++){
             if (line[i] == ',') line[i] = ' ';
@@ -85,7 +85,7 @@ void GetNext(ifstream &file, vector<WordInfo> &now, int i)
         if (DEBUG)  cout << "now[" << i << "] = " << now[i].word_hash << " " << now[i].word_num << " " << now[i].url << endl;
     }
     else{
-        now[i].word_hash = 0x7FFFFF;
+        now[i].word_hash = MOD;
     }
 }
 
@@ -117,7 +117,7 @@ int main()
     file.close();
     ofstream outFile;
     outFile.open(save_path, ios::app);
-    while(now[LoserTree[0]].word_hash != 0x7FFFFF){
+    while(now[LoserTree[0]].word_hash != MOD){
         // cout << now[LoserTree[0]].word_hash << " " << now[LoserTree[0]].word_num << " " << now[LoserTree[0]].url << endl;
         // outFile << now[LoserTree[0]].word_hash << "," << now[LoserTree[0]].word_num << "," << now[LoserTree[0]].url << endl;
         if (!temp_index.empty() && temp_index.back().word_hash != now[LoserTree[0]].word_hash){
@@ -130,7 +130,6 @@ int main()
             url_list += "\"";
             outFile << temp_index[0].word_hash << "," << word_num_list << "," << url_list << endl;
             temp_index.clear();
-
         }
         temp_index.push_back(WordInfo(now[LoserTree[0]].word_hash, now[LoserTree[0]].word_num, now[LoserTree[0]].url));
 

@@ -8,6 +8,8 @@
 using namespace std;
 
 
+const int MOD = 0x7FFFFF;
+
 struct NewsInfo{
     int url;
     vector<int> word_num;
@@ -53,7 +55,8 @@ unsigned int BKDRHash(const char *str){  // 哈希函数
     while (*str)    hash = hash * seed + (*str++);
 
     // return (hash & 0x7FFFFFFF);
-    return (hash & 0x7FFFFF);
+    // return (hash & 0x7FFFFF);
+    return (hash & MOD);
 }
 
 
@@ -177,7 +180,7 @@ string load_invert_index_path = "data/invert_index.csv";
 string load_word_code_path = "data/word_code.csv";
 string load_url_code_path = "data/url_code.csv";
 string save_ans_path = "data/ans.csv";
-vector<string> word_code(0x7FFFFF, " ");
+vector<string> word_code(MOD, " ");
 vector<URLInfo> url_code;
 vector<NewsInfo> news;
 int type = 0;   //0-并集，1-交集
