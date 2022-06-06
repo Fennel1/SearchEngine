@@ -23,13 +23,17 @@ reader = csv.reader(csvFile)
 for i, item in enumerate(reader):
     if len(item) > 0:
         # print(item[1])          # 新闻标题分词
+        year = ""
         day = ""
         for j in range(len(item[0])):
-            if item[0][j] == "/" and item[0][j-4:j] == "2022":
+            if item[0][j] == "/" and (item[0][j-4:j] <= "2022" and item[0][j-4:j] >= "2000"):
+                year = item[0][j-4:j]
                 day = item[0][j+1:j+5]
+            else :
+                continue
         with open(save_url_code_path, 'a+', encoding="GBK", newline='') as f:
             writer = csv.writer(f)
-            writer.writerow([i, day, 0.0, item[0], item[1]])
+            writer.writerow([i, year, day, 0.0, item[0], item[1]])
 
         title = jieba.lcut_for_search(item[1])
         while ',' in title:

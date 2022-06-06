@@ -98,7 +98,7 @@ int main()
         temp_index.push_back(WordInfo(word_hash, word_num, url_code));
 
         count++;
-        if (count==10000){
+        if (count==100000){
             MergeSort(temp_index, 0, temp_index.size()-1);
             count=0;
             file_index++;

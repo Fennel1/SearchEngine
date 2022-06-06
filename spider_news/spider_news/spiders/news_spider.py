@@ -46,5 +46,5 @@ class NewsSpider(scrapy.Spider):
                     writer = csv.writer(f)
                     writer.writerow([data['url'], data['title'], data['news_content'].split("人民日报违法和不良信息举报电话")[0]])
                 # yield data
-        # anchors_a = response.css('div.relevant_news a')
-        # yield from response.follow_all(anchors_a, callback=self.parse)
+        anchors_a = response.css('div.rm_relevant a')
+        yield from response.follow_all(anchors_a, callback=self.parse)

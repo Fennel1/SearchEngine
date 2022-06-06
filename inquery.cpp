@@ -28,18 +28,20 @@ struct NewsInfo{
 struct URLInfo{
     string url;
     string title;
-    int day;
+    int day, year;
     double score;
-    URLInfo(string url, string title, int day, double score){
+    URLInfo(string url, string title, int day, int year, double score){
         this->url = url;
         this->title = title;
         this->day = day;
+        this->year = year;
         this->score = score;
     }
     URLInfo(const URLInfo &other){
         this->url = other.url;
         this->title = other.title;
         this->day = other.day;
+        this->year = other.year;
         this->score = other.score;
     }
 };
@@ -82,10 +84,14 @@ void QuickSortTime(vector<NewsInfo> &mylist, vector<URLInfo> &url_code, int low,
 
     NewsInfo tmp = mylist[low];
     while (low < high){
-        while (url_code[mylist[high].url].day <= url_code[tmp.url].day && low < high) high--;
+        while (((url_code[mylist[high].url].year < url_code[tmp.url].year) ||
+         ((url_code[mylist[high].url].year == url_code[tmp.url].year) && (url_code[mylist[high].url].day <= url_code[tmp.url].day))) && 
+         low < high) high--;
         mylist[low] = mylist[high];
 
-        while(url_code[mylist[low].url].day >= url_code[tmp.url].day && low < high) low++;
+        while(((url_code[mylist[low].url].year > url_code[tmp.url].year) || 
+        ((url_code[mylist[low].url].year == url_code[tmp.url].year) && (url_code[mylist[low].url].day >= url_code[tmp.url].day))) && 
+        low < high) low++;
         mylist[high] = mylist[low];
     }
 
@@ -170,6 +176,7 @@ void MergeSort(vector<NewsInfo> &mylist, int low, int high, int p)
 string load_invert_index_path = "data/invert_index.csv";
 string load_word_code_path = "data/word_code.csv";
 string load_url_code_path = "data/url_code.csv";
+string save_ans_path = "data/ans.csv";
 vector<string> word_code(0x7FFFFF, " ");
 vector<URLInfo> url_code;
 vector<NewsInfo> news;
@@ -202,13 +209,13 @@ int main()
         }
         line += "\"";
         istringstream ss(line);
-        int code, day;
+        int code, day, year;
         double score;
         string url, title;
-        ss >> code >> day >> score >> url;
+        ss >> code >> year >> day >> score >> url;
         getline(ss, title, '\"');
         // cout << code << " " << day << " " << score << " " << url << " " << title << endl;
-        url_code.push_back(URLInfo(url, title, day, score));
+        url_code.push_back(URLInfo(url, title, day, year, score));
     }
     inFile.close();
 
@@ -386,7 +393,7 @@ int main()
         cout << "运行时间"<< (double)(t_end-t_start)/CLOCKS_PER_SEC << "s" <<endl;
         if (news.empty()) cout << "查询结果为空" << endl << endl;
         else{
-            for (unsigned int i=0; i<news.size(); i++){
+            for (unsigned int i=0; i<news.size() && i<200; i++){
                 cout << i+1 << "： " << url_code[news[i].url].url << endl;
                 cout << "标题：" << url_code[news[i].url].title << endl;
                 cout << "关键词：";
@@ -394,11 +401,12 @@ int main()
                     cout << news[i].words[j] << ":" << news[i].word_num[j] << "次  ";
                 }
                 cout << endl;
-                if (model == 0) cout << "日期：" << url_code[news[i].url].day/100 << "月" << url_code[news[i].url].day%100 << "日" << endl;
+                if (model == 0) cout << "日期：" << url_code[news[i].url].year << "年" << url_code[news[i].url].day/100 << "月" << url_code[news[i].url].day%100 << "日" << endl;
                 else    cout << "得分：" << url_code[news[i].url].score << endl;
                 cout << endl;
             }
         }
+        if (news.size() > 200) cout << "查询结果超过200条，全部查询结果储存于ans.csv" << endl;
 
         if (!news.empty()){ // 更新权重
             for (unsigned int i=0; i<news.size(); i++){
@@ -411,8 +419,15 @@ int main()
             file.close();
             file.open(load_url_code_path, ios::app);
             for (unsigned int i=0; i<url_code.size(); i++){
-                file << i << "," << url_code[i].day << "," << url_code[i].score << "," << url_code[i].url << "," << "\""+url_code[i].title.substr(1, url_code[i].title.size()-1)+"\"" << endl;
-                // cout << i << "," << url_code[i].day << "," << url_code[i].score << "," << url_code[i].url << "," << "\""+url_code[i].title.substr(1, url_code[i].title.size()-1)+"\"" << endl;
+                file << i << "," << url_code[i].year << "," << url_code[i].day << "," << url_code[i].score << "," << url_code[i].url << "," << "\""+url_code[i].title.substr(1, url_code[i].title.size()-1)+"\"" << endl;
+            }
+            file.close();
+
+            file.open(save_ans_path, fstream::binary);
+            file.close();
+            file.open(save_ans_path, ios::app);
+            for (unsigned int i=0; i<news.size(); i++){
+                file << i+1 << "," << url_code[news[i].url].url << "," << url_code[news[i].url].title << "," << url_code[news[i].url].year << "," << url_code[news[i].url].day << "," << url_code[news[i].url].score << endl;
             }
         }
 

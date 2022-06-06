@@ -1,7 +1,7 @@
-cd spider_news/spider_news
-scrapy crawl news --nolog
+@REM cd spider_news/spider_news
+@REM scrapy crawl news --nolog
+@REM cd ../../
 
-cd ../../
 python jieba_cut.py
 
 copy bin\hash.exe hash.exe /Y
