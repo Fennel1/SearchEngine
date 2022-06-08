@@ -17,7 +17,7 @@ with open(save_url_code_path, 'r+', encoding="utf_8_sig", newline='') as f:  # �
     f.truncate()
 
 words_set = rbt.RedBlackTree()
-words_list = list()
+words_num = 0
 
 csvFile = open(load_path, "r", encoding="utf_8_sig")
 reader = csv.reader(csvFile)
@@ -41,7 +41,7 @@ for i, item in enumerate(reader):
             title.remove(',')
         for c in title:         # 统计词数
             words_set.insert(rbt.Node(c))
-            words_list.append(c)
+            words_num += 1
         # print(title)
         title = ','.join(title)
 
@@ -51,7 +51,7 @@ for i, item in enumerate(reader):
             words.remove(',')
         for c in words:         # 统计词数
             words_set.insert(rbt.Node(c))
-            words_list.append(c)
+            words_num += 1
         words = ','.join(words)
         # print(words)
 
@@ -66,5 +66,5 @@ csvFile.close()
 t_end = time.time()
 print("————————————————————————————分词结束————————————————————————————")
 print("分词用时：", t_end - t_start, "s")
-print('单词数(有重复):',len(words_list))
+print('单词数(有重复):',words_num)
 print('单词数(无重复):',len(words_set))
