@@ -2,6 +2,7 @@
 import jieba
 import csv
 import time
+import RedBlackTree as rbt
 
 load_path = "data/news.csv"
 save_news_words_path = "data/news_words.csv"
@@ -15,7 +16,7 @@ with open(save_news_words_path, 'r+', encoding="utf_8_sig", newline='') as f:  #
 with open(save_url_code_path, 'r+', encoding="utf_8_sig", newline='') as f:  # 清空文件
     f.truncate()
 
-words_set = set()
+words_set = rbt.RedBlackTree()
 words_list = list()
 
 csvFile = open(load_path, "r", encoding="utf_8_sig")
@@ -39,7 +40,7 @@ for i, item in enumerate(reader):
         while ',' in title:
             title.remove(',')
         for c in title:         # 统计词数
-            words_set.add(c)
+            words_set.insert(rbt.Node(c))
             words_list.append(c)
         # print(title)
         title = ','.join(title)
@@ -49,7 +50,7 @@ for i, item in enumerate(reader):
         while ',' in words:
             words.remove(',')
         for c in words:         # 统计词数
-            words_set.add(c)
+            words_set.insert(rbt.Node(c))
             words_list.append(c)
         words = ','.join(words)
         # print(words)

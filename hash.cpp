@@ -44,12 +44,25 @@ struct WordInfo{
     }
 };
 
+struct WordCode{
+    string word;
+    int num;
+    WordCode(string word, int num){
+        this->word = word;
+        this->num = num;
+    }
+    WordCode(const WordCode &other){
+        this->word = other.word;
+        this->num = other.num;
+    }
+};
+
 string load_path = "data/news_words.csv";
 string save_temp_index_path = "data/temp_index.csv";
 string save_word_code_path = "data/word_code.csv";
 // string save_url_code_path = "data/url_code.csv";
 vector<WordInfo> temp_index;          // 临时索引文件
-vector<pair<string, int>> word_code(MOD, make_pair(" ", 0));    // 单词编号文件
+vector<WordCode> word_code(MOD, WordCode(" ", 0));    // 单词编号文件
 // vector<string> url_code;                    // 网址编号文件
 clock_t t_start, t_end;
 bool DEBUG = false;
@@ -89,24 +102,24 @@ int main()
             if (words[i] == ','){
                 word_hash = BKDRHash(word.c_str());     // 获取哈希值
                 // cout << word << ":" << word_hash << endl;
-                if (word_code[word_hash].first ==  " "){    // 单词编号文件中没有该单词
-                    word_code[word_hash].first = word;
-                    word_code[word_hash].second = 1;
+                if (word_code[word_hash].word ==  " "){    // 单词编号文件中没有该单词
+                    word_code[word_hash].word = word;
+                    word_code[word_hash].num = 1;
                 }
-                else if (word_code[word_hash].first == word){   // 单词已经存在，则记录次数
-                    word_code[word_hash].second++;
+                else if (word_code[word_hash].word == word){   // 单词已经存在，则记录次数
+                    word_code[word_hash].num++;
                 }
                 else{   // 单词冲突
-                    if (DEBUG) cout << "冲突：" << word << ":" << word_code[word_hash].first << word_hash << endl;
+                    if (DEBUG) cout << "冲突：" << word << ":" << word_code[word_hash].word << word_hash << endl;
                     while (true){
-                        if (word_code[word_hash].first == " "){
-                            word_code[word_hash].first = word;
-                            word_code[word_hash].second = 1;
+                        if (word_code[word_hash].word == " "){
+                            word_code[word_hash].word = word;
+                            word_code[word_hash].num = 1;
                             conflict_word_num++;
                             break;
                         }
-                        else if (word_code[word_hash].first == word){
-                            word_code[word_hash].second++;
+                        else if (word_code[word_hash].word == word){
+                            word_code[word_hash].num++;
                             break;
                         }
                         else conflict_num++;
@@ -121,9 +134,9 @@ int main()
         }
 
         for (unsigned int i=0; i<MOD; i++){
-            if (word_code[i].first != " " && word_code[i].second != 0){
-                temp_index.push_back(WordInfo(i, word_code[i].second, url_num));
-                word_code[i].second = 0;
+            if (word_code[i].word != " " && word_code[i].num != 0){
+                temp_index.push_back(WordInfo(i, word_code[i].num, url_num));
+                word_code[i].num = 0;
             }
         }
 
@@ -143,8 +156,8 @@ int main()
     outFile.close();
     outFile.open(save_word_code_path);
     for (unsigned int i=0; i<word_code.size(); i++){
-        if (word_code[i].first != " ")
-            outFile << i << "," << word_code[i].first << endl;
+        if (word_code[i].word != " ")
+            outFile << i << "," << word_code[i].word << endl;
     }
     outFile.close();
     // outFile.open(save_url_code_path);
