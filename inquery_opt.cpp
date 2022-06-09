@@ -288,7 +288,8 @@ int main()
         cout << "输入要查询的单词(以空格分隔)：";
         getline(cin, line);
         for (unsigned int i=0; i<line.size(); i++){
-            if (line[i] == ' ') {
+            if (line[i] == ' ' && word == "") continue;
+            else if (line[i] == ' ') {
                 words.push_back(word);
                 word = "";
             }
@@ -330,7 +331,7 @@ int main()
             }
             num_list = invert_index[word_hash].word_num;
             url_list = invert_index[word_hash].url_code;
-            cout << "网页数量：" << num_list.size() << endl;
+            cout << "查找成功，包含网页数：" << url_list.size() << endl;
 
             if (type == 0){     //并集
                 if (news.empty()) {
@@ -469,7 +470,7 @@ int main()
 
         cout << "是否继续查询？(y/n)：";
         cin >> state;
-        if (state == "y"){
+        if (state != "n"){
             news.clear();
             words.clear();
             word = "";
@@ -477,7 +478,7 @@ int main()
             getchar();
         }
 
-    }while(state=="y");
+    }while(state!="n");
 
     return 0;
 }

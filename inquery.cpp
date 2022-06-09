@@ -235,7 +235,8 @@ int main()
         cout << "输入要查询的单词(以空格分隔)：";
         getline(cin, line);
         for (unsigned int i=0; i<line.size(); i++){
-            if (line[i] == ' ') {
+            if (line[i] == ' ' && word == "") continue;
+            else if (line[i] == ' ') {
                 words.push_back(word);
                 word = "";
             }
@@ -442,7 +443,7 @@ int main()
 
         cout << "是否继续查询？(y/n)：";
         cin >> state;
-        if (state == "y"){
+        if (state != "n"){
             news.clear();
             words.clear();
             word = "";
@@ -450,7 +451,7 @@ int main()
             getchar();
         }
 
-    }while(state=="y");
+    }while(state!="n");
 
     return 0;
 }
